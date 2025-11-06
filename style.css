@@ -1,0 +1,155 @@
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    /* Light Pink Background */
+    background-color: #ffe6f2; 
+    color: #333;
+}
+
+.game-container {
+    background: #ffffff;
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 90%;
+    max-width: 650px;
+}
+
+h1 {
+    /* Deep Pink Title */
+    color: #ff1493; 
+    margin-bottom: 10px;
+}
+
+.objective {
+    font-size: 1em;
+    margin-bottom: 20px;
+    color: #555;
+    font-weight: bold;
+}
+
+/* --- Stats and Question Counter --- */
+.header-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #ffc0cb; 
+}
+
+/* --- Problem Display --- */
+.problem-area {
+    border: 2px solid #ffc0cb; 
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    background-color: #fff0f5; 
+}
+
+.word-problem-display {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #8b0000; /* Dark Red */
+    margin: 15px 0;
+    line-height: 1.5;
+}
+
+/* --- Multiple Choice Options --- */
+.options-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.option-button {
+    padding: 15px;
+    font-size: 1.4em;
+    border: 2px solid #ff69b4; 
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #fff0f5; 
+    transition: background-color 0.2s, transform 0.1s;
+    line-height: 1.2;
+}
+
+.option-button:hover {
+    background-color: #ffc0cb; 
+    transform: scale(1.02);
+}
+
+.feedback {
+    min-height: 25px;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.correct {
+    color: #3cb371; 
+}
+
+.incorrect {
+    color: #dc143c; 
+}
+
+/* --- Fraction Formatting (for answers) --- */
+.fraction-line {
+    border-bottom: 3px solid #333;
+    display: inline-block;
+    padding: 0 5px;
+    margin: 0 5px;
+    vertical-align: middle;
+}
+.whole-number {
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
+/* --- Start and Next Button Styles --- */
+#start-button, #next-button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #ff69b4; /* Hot Pink */
+    color: white;
+    font-weight: bold;
+    margin-top: 20px;
+    box-shadow: 0 4px #c70d74;
+    transition: background-color 0.2s;
+}
+
+#start-button:active, #next-button:active {
+    box-shadow: none;
+    transform: translateY(4px);
+}
+
+/* --- Results Screen Styles --- */
+.results-screen {
+    display: none; 
+    padding: 20px;
+    border: 3px solid #ff1493; 
+    border-radius: 15px;
+    background-color: #fff0f5; 
+}
+
+.results-screen h2 {
+    color: #ff1493;
+    font-size: 2em;
+}
+
+.score-final {
+    font-size: 3em;
+    font-weight: bold;
+    color: #3cb371; 
+    margin: 10px 0 20px;
+}

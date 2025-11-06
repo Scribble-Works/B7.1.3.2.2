@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraction Word Problem Solver</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+        
+        <div id="game-screen">
+            <h1>🧠 Fraction Word Problem Solver</h1>
+            <p class="objective">Objective B7.1.3.2.2: Solve word problems involving addition or subtraction of fractions.</p>
+            
+            <div class="header-stats">
+                <div>Score: <span id="score-tracker">0</span></div>
+                <div>Question: <span id="question-counter">0</span> / 20</div>
+            </div>
+
+            <div class="problem-area">
+                <p>Read the problem and find the final answer:</p>
+                <div id="word-problem-text" class="word-problem-display">Click 'Start Challenge' to load the first problem.</div>
+            </div>
+            
+            <p>Select the correct, simplified result:</p>
+
+            <div id="options-container" class="options-container">
+                </div>
+
+            <div id="feedback-area" class="feedback">Ready to apply your fraction skills?</div>
+            <button id="start-button">Start Challenge</button>
+            <button id="next-button" style="display: none;">Next Question</button>
+        </div>
+
+        <div id="results-screen" class="results-screen">
+            <h2>🥳 Challenge Complete!</h2>
+            <p>You finished 20 questions. Your final score is:</p>
+            <div id="final-score-display" class="score-final"></div>
+            <p id="celebration-message">Great job on solving the word problems!</p>
+            <button class="restart-button" onclick="window.location.reload()">Restart Challenge</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
