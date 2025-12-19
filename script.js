@@ -1,285 +1,197 @@
-// The entire game logic is wrapped in an IIFE to safely scope variables (like currentProblem)
-// and functions, preventing them from polluting the global window object.
-(function() {
-
-    // --- Game State Variables ---
-    const MAX_QUESTIONS = 20;
-    let score = 0;
-    let questionNumber = 0;
-    let currentProblem = null; // Safely contained within this function's scope!
-
-    // --- Mathematical Helper Functions ---
-
-    function gcd(a, b) {
-        return b === 0 ? a : gcd(b, a % b);
+// Fraction word problems
+const problems = [
+    {
+        text: "Sarah ate 1/4 of a pizza and John ate 1/3 of the same pizza. How much pizza did they eat together?",
+        options: ["2/7", "7/12", "1/12", "5/12"],
+        correct: 1
+    },
+    {
+        text: "A recipe calls for 3/4 cup of sugar, but you only have 1/2 cup. How much more sugar do you need?",
+        options: ["1/4 cup", "1/2 cup", "5/4 cups", "1/8 cup"],
+        correct: 0
+    },
+    {
+        text: "Tom ran 2 1/2 miles on Monday and 1 3/4 miles on Tuesday. How many miles did he run in total?",
+        options: ["3 1/4 miles", "4 1/4 miles", "3 3/4 miles", "4 1/2 miles"],
+        correct: 1
+    },
+    {
+        text: "A tank is 5/6 full of water. After using 1/3 of the tank, how much water is left?",
+        options: ["1/2", "1/3", "1/6", "2/3"],
+        correct: 0
+    },
+    {
+        text: "Emma has 3/5 of a chocolate bar and gives 1/4 to her friend. How much does she have left?",
+        options: ["7/20", "2/9", "1/20", "7/9"],
+        correct: 0
+    },
+    {
+        text: "A piece of wood is 4 1/3 feet long. If you cut off 2 1/2 feet, how long is the remaining piece?",
+        options: ["1 1/6 feet", "1 5/6 feet", "2 1/6 feet", "6 5/6 feet"],
+        correct: 1
+    },
+    {
+        text: "In a garden, 2/5 of the flowers are roses and 1/4 are tulips. What fraction of the flowers are roses or tulips?",
+        options: ["3/9", "13/20", "3/20", "7/20"],
+        correct: 1
+    },
+    {
+        text: "A container holds 3 3/4 liters of juice. After pouring out 1 2/3 liters, how much juice remains?",
+        options: ["2 1/12 liters", "1 1/12 liters", "2 1/4 liters", "5 1/12 liters"],
+        correct: 0
+    },
+    {
+        text: "Mike spent 1/6 of his allowance on candy and 1/3 on games. What fraction of his allowance did he spend in total?",
+        options: ["1/18", "1/9", "1/2", "2/9"],
+        correct: 2
+    },
+    {
+        text: "A rope is 5 1/2 meters long. If you cut off 2 3/4 meters, how long is the remaining rope?",
+        options: ["2 3/4 meters", "3 1/4 meters", "2 1/4 meters", "7 3/4 meters"],
+        correct: 0
     }
+];
 
-    /**
-     * Simplifies an improper fraction (numerator/denominator) to a standardized string format.
-     * Format: "W N/D" or "N/D" or "W" (e.g., "1 1/2", "3/4", "5")
-     */
-    function simplifyFraction(n, d) {
-        if (n === 0) return "0";
-        
-        const sign = n < 0 ? "-" : "";
-        n = Math.abs(n);
-        d = Math.abs(d);
+// DOM elements
+const startScreen = document.getElementById('start-screen');
+const quizScreen = document.getElementById('quiz-screen');
+const gameOverScreen = document.getElementById('game-over-screen');
+const startBtn = document.getElementById('start-btn');
+const restartBtn = document.getElementById('restart-btn');
+const problemText = document.getElementById('problem-text');
+const problemCount = document.getElementById('problem-count');
+const optionsContainer = document.getElementById('options-container');
+const scoreElement = document.getElementById('score');
+const feedbackMessage = document.getElementById('feedback-message');
+const correctSound = document.getElementById('correctSound');
+const incorrectSound = document.getElementById('incorrectSound');
 
-        if (n % d === 0) {
-            return sign + (n / d).toString(); // Whole number
-        }
+// Game state
+let currentProblemIndex = 0;
+let score = 0;
+let selectedAnswer = null;
 
-        const commonDivisor = gcd(n, d);
-        const simplifiedN = n / commonDivisor;
-        const simplifiedD = d / commonDivisor;
+// Initialize game
+function initGame() {
+    currentProblemIndex = 0;
+    score = 0;
+    showStartScreen();
+}
 
-        const whole = Math.floor(simplifiedN / simplifiedD);
-        const remainder = simplifiedN % simplifiedD;
+// Show start screen
+function showStartScreen() {
+    startScreen.classList.remove('hidden');
+    quizScreen.classList.add('hidden');
+    gameOverScreen.classList.add('hidden');
+    resetButtons();
+}
 
-        const fractionStr = `${remainder}/${simplifiedD}`;
+// Start the activity
+function startActivity() {
+    startScreen.classList.add('hidden');
+    quizScreen.classList.remove('hidden');
+    loadProblem();
+}
 
-        if (whole > 0) {
-            return `${sign}${whole} ${fractionStr}`; // Mixed number
-        } else {
-            return `${sign}${fractionStr}`; // Proper fraction
-        }
-    }
-
-    /**
-     * Converts a simplified string (e.g., "1 1/2" or "3/4" or "5") to a full HTML display string 
-     * for the options buttons, including the required CSS classes.
-     */
-    function formatFractionDisplayHTML(simplifiedStr) {
-        let cleanStr = simplifiedStr.trim();
-        if (cleanStr === "0") return "0";
-        
-        // 1. Check for whole number
-        if (!cleanStr.includes('/')) {
-            return cleanStr; // Return as a simple string
-        }
-
-        // 2. Check for mixed number ("W N/D")
-        const parts = cleanStr.split(' ');
-        if (parts.length === 2) {
-            const whole = parts[0];
-            const [n, d] = parts[1].split('/');
-            return `<span class="whole-number">${whole}</span> <span class="fraction-line">${n} / ${d}</span>`;
-        } 
-        
-        // 3. Must be a proper fraction ("N/D")
-        if (cleanStr.includes('/')) {
-            const [n, d] = cleanStr.split('/');
-            return `<span class="fraction-line">${n} / ${d}</span>`;
-        } 
-        
-        return cleanStr;
-    }
-
-
-    /**
-     * Performs the actual addition/subtraction and returns the simplified result string.
-     */
-    function calculateResult(f1, op, f2) {
-        // Convert to improper fractions
-        const n1 = f1.n + f1.w * f1.d;
-        const n2 = f2.n + f2.w * f2.d;
-        const d1 = f1.d;
-        const d2 = f2.d;
-
-        // Find LCD
-        const commonD = (d1 * d2) / gcd(d1, d2);
-
-        // Adjust numerators
-        const newN1 = n1 * (commonD / d1);
-        const newN2 = n2 * (commonD / d2);
-
-        let finalN;
-        if (op === '+') {
-            finalN = newN1 + newN2;
-        } else { // op === '-'
-            finalN = newN1 - newN2;
-        }
-
-        return simplifyFraction(finalN, commonD);
-    }
-
-    // Helper to shuffle arrays
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    // --- PROBLEM DATA ---
-    const ALL_PROBLEMS = [
-        ["Sarah drank 1 1/2 litres of water in the morning and 3/4 litres in the afternoon. How much water did she drink in total?", {w: 1, n: 1, d: 2}, '+', {w: 0, n: 3, d: 4}, "litres"],
-        ["A builder needs 5 1/3 bags of cement for a job. If he only has 2 1/6 bags, how many more bags must he buy?", {w: 5, n: 1, d: 3}, '-', {w: 2, n: 1, d: 6}, "bags"],
-        ["A ribbon is 7/8 metre long. If 1/4 metre is cut off, what length of ribbon is left?", {w: 0, n: 7, d: 8}, '-', {w: 0, n: 1, d: 4}, "metre"],
-        ["A pizza recipe calls for 1/3 cup of flour and 1/6 cup of cornmeal. How much dry ingredients are needed in total?", {w: 0, n: 1, d: 3}, '+', {w: 0, n: 1, d: 6}, "cup"],
-        ["A farmer sold 3 4/5 hectares of land. If he started with 5 1/2 hectares, how much land does he have left?", {w: 5, n: 1, d: 2}, '-', {w: 3, n: 4, d: 5}, "hectares"],
-        ["Mark spent 1/2 hour studying math and 2/3 hour studying science. What is the total time he spent studying?", {w: 0, n: 1, d: 2}, '+', {w: 0, n: 2, d: 3}, "hour"],
-        ["A tank holds 10 litres of fuel. If it is already 3 1/5 litres full, how much more fuel can be added?", {w: 10, n: 0, d: 1}, '-', {w: 3, n: 1, d: 5}, "litres"],
-        ["Two pipes are joined together. One is 2 1/4 feet long and the other is 1 5/8 feet long. What is their combined length?", {w: 2, n: 1, d: 4}, '+', {w: 1, n: 5, d: 8}, "feet"],
-    ];
-
-    // --- DOM Elements ---
-    const wordProblemEl = document.getElementById('word-problem-text');
-    const optionsContainer = document.getElementById('options-container');
-    const feedbackArea = document.getElementById('feedback-area');
-    const startButton = document.getElementById('start-button');
-    const nextButton = document.getElementById('next-button');
-    const scoreTracker = document.getElementById('score-tracker');
-    const questionCounter = document.getElementById('question-counter');
-    const gameScreen = document.getElementById('game-screen');
-    const resultsScreen = document.getElementById('results-screen');
-    const finalScoreDisplay = document.getElementById('final-score-display');
-    const celebrationMessage = document.getElementById('celebration-message');
-
-
-    // --- Core Game Functions ---
-
-    function generateDistractors(correctAnswer) {
-        const distractors = [];
-        const uniqueIncorrectOptions = [
-            "1/3", "2 1/2", "3 1/8", "1 1/12", "5/6", "1 1/6", "3 1/4", "1 1/8", "6/5", "2 1/5", "4 1/4", "7/8", "1", "3/5", "1 1/4"
-        ];
-
-        while (distractors.length < 3) {
-            const randomIndex = Math.floor(Math.random() * uniqueIncorrectOptions.length);
-            const distractor = uniqueIncorrectOptions[randomIndex];
-            if (distractor !== correctAnswer && !distractors.includes(distractor)) {
-                distractors.push(distractor);
-            }
-        }
-        return distractors;
-    }
-
-
-    function endGame() {
-        gameScreen.style.display = 'none';
-        resultsScreen.style.display = 'block';
-
-        finalScoreDisplay.textContent = `${score} / ${MAX_QUESTIONS}`;
-
-        const percentage = (score / MAX_QUESTIONS) * 100;
-        let message = '';
-        
-        if (percentage >= 90) {
-            message = "👑 Masterful! You crushed the word problems and the fractions!";
-        } else if (percentage >= 70) {
-            message = "🌟 Excellent! You correctly interpreted and solved most problems.";
-        } else if (percentage >= 50) {
-            message = "👍 Good effort! Focus on setting up the equation before solving the math.";
-        } else {
-            message = "Keep practicing! Reviewing the language (more/less/total/left) is key.";
-        }
-
-        celebrationMessage.textContent = message;
-    }
-
-    /**
-     * Loads a new word problem and renders options.
-     */
-    function loadNewProblem() {
-        if (questionNumber >= MAX_QUESTIONS) {
-            endGame();
-            return;
-        }
-        
-        questionNumber++;
-        questionCounter.textContent = questionNumber;
-
-        const problemIndex = Math.floor(Math.random() * ALL_PROBLEMS.length);
-        const [text, f1, op, f2, unit] = ALL_PROBLEMS[problemIndex];
-        
-        const correctValueStr = calculateResult(f1, op, f2);
-        
-        wordProblemEl.innerHTML = text;
-
-        const distractors = generateDistractors(correctValueStr);
-        let options = [];
-        
-        // Add distractors 
-        distractors.forEach(d => {
-            options.push({ 
-                value: d, 
-                display: formatFractionDisplayHTML(d) + ` ${unit}`
-            });
-        });
-
-        // Add correct answer
-        options.push({ 
-            value: correctValueStr, 
-            display: formatFractionDisplayHTML(correctValueStr) + ` ${unit}`
-        });
-
-        shuffle(options);
-        optionsContainer.innerHTML = '';
-        
-        currentProblem = {correct: correctValueStr}; 
-        
-        options.forEach(option => {
-            const button = document.createElement('button');
-            button.innerHTML = option.display;
-            button.classList.add('option-button');
-            button.setAttribute('data-value', option.value); 
-            button.onclick = checkAnswer;
-            optionsContainer.appendChild(button);
-        });
-
-        // Reset UI
-        feedbackArea.textContent = 'Analyze the problem and select the answer.';
-        feedbackArea.className = 'feedback';
-        nextButton.style.display = 'none';
-    }
-
-    /**
-     * Checks the user's selected option.
-     */
-    function checkAnswer(event) {
-        document.querySelectorAll('.option-button').forEach(btn => btn.onclick = null);
-
-        const selectedValue = event.target.getAttribute('data-value');
-        const correctValue = currentProblem.correct;
-
-        if (selectedValue === correctValue) {
-            feedbackArea.textContent = '🥳 Correct! Great problem analysis and math! (+1)';
-            feedbackArea.className = 'feedback correct';
-            event.target.style.backgroundColor = '#3cb371'; 
-            score++;
-            scoreTracker.textContent = score;
-        } else {
-            feedbackArea.textContent = `❌ Incorrect. The correct simplified answer is ${correctValue}.`;
-            feedbackArea.className = 'feedback incorrect';
-            event.target.style.backgroundColor = '#dc143c'; 
-            
-            document.querySelectorAll('.option-button').forEach(btn => {
-                if (btn.getAttribute('data-value') === correctValue) {
-                    btn.style.border = '4px solid #3cb371';
-                }
-            });
-        }
-        
-        nextButton.style.display = 'block'; 
-    }
-
-    function startGame() {
-        startButton.style.display = 'none'; // Hide Start button
-        loadNewProblem();
-    }
-
-    // --- Event Listeners and Initial Load ---
+// Load current problem
+function loadProblem() {
+    resetButtons();
+    const current = problems[currentProblemIndex];
+    problemText.textContent = current.text;
+    problemCount.textContent = currentProblemIndex + 1;
     
-    // Attach event listeners after all DOM elements are defined
-    startButton.addEventListener('click', startGame);
-    nextButton.addEventListener('click', loadNewProblem);
+    // Display options
+    optionsContainer.innerHTML = '';
+    current.options.forEach((option, index) => {
+        const optionBtn = document.createElement('button');
+        optionBtn.className = 'option-btn';
+        optionBtn.textContent = option;
+        optionBtn.addEventListener('click', () => selectAnswer(index));
+        optionsContainer.appendChild(optionBtn);
+    });
+}
 
-    // Initial setup on page load
-    window.onload = () => {
-        optionsContainer.innerHTML = ''; 
-        nextButton.style.display = 'none';
-    };
+// Reset option buttons
+function resetButtons() {
+    const buttons = optionsContainer.querySelectorAll('.option-btn');
+    buttons.forEach(btn => {
+        btn.classList.remove('selected');
+        btn.disabled = false;
+    });
+    selectedAnswer = null;
+}
 
-})(); // End of IIFE
+// Play sound safely
+function playSound(audioElement) {
+    audioElement.currentTime = 0;
+    audioElement.play().catch(e => console.log("Audio play prevented:", e));
+}
+
+// Handle answer selection
+function selectAnswer(choiceIndex) {
+    if (selectedAnswer !== null) return;
+    selectedAnswer = choiceIndex;
+    
+    // Highlight selected button
+    const buttons = optionsContainer.querySelectorAll('.option-btn');
+    buttons[choiceIndex].classList.add('selected');
+    
+    // Disable all buttons
+    buttons.forEach(btn => btn.disabled = true);
+    
+    // Check answer
+    const current = problems[currentProblemIndex];
+    const isCorrect = choiceIndex === current.correct;
+    
+    if (isCorrect) {
+        score++;
+        playSound(correctSound);
+    } else {
+        playSound(incorrectSound);
+    }
+    
+    // Move to next problem or end activity
+    setTimeout(() => {
+        currentProblemIndex++;
+        if (currentProblemIndex < problems.length) {
+            loadProblem();
+        } else {
+            endActivity();
+        }
+    }, 1800);
+}
+
+// End the activity
+function endActivity() {
+    quizScreen.classList.add('hidden');
+    gameOverScreen.classList.remove('hidden');
+    
+    scoreElement.textContent = score;
+    
+    let feedback = '';
+    let feedbackClass = '';
+    
+    if (score >= 9) {
+        feedback = "Excellent! You're a fraction problem-solving expert!";
+        feedbackClass = 'excellent';
+    } else if (score >= 7) {
+        feedback = "Great job! You can confidently solve fraction word problems!";
+        feedbackClass = 'good';
+    } else if (score >= 5) {
+        feedback = "Good effort! Practice more fraction word problems to improve.";
+        feedbackClass = 'practice';
+    } else {
+        feedback = "Keep practicing! Solving fraction word problems gets easier with practice.";
+        feedbackClass = 'practice';
+    }
+    
+    feedbackMessage.textContent = feedback;
+    feedbackMessage.className = `feedback ${feedbackClass}`;
+}
+
+// Event listeners
+startBtn.addEventListener('click', startActivity);
+restartBtn.addEventListener('click', initGame);
+
+// Initialize the game
+initGame();

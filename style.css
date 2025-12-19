@@ -1,155 +1,251 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    /* Light Pink Background */
-    background-color: #ffe6f2; 
-    color: #333;
+    padding: 20px;
 }
 
-.game-container {
-    background: #ffffff;
-    padding: 30px 40px;
+.screen {
+    background: white;
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     width: 90%;
     max-width: 650px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.screen::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(187, 222, 251, 0.2) 0%, transparent 70%);
+    z-index: 0;
+}
+
+.screen > * {
+    position: relative;
+    z-index: 1;
+}
+
+.hidden {
+    display: none;
 }
 
 h1 {
-    /* Deep Pink Title */
-    color: #ff1493; 
-    margin-bottom: 10px;
-}
-
-.objective {
-    font-size: 1em;
+    color: #01579b;
     margin-bottom: 20px;
-    color: #555;
-    font-weight: bold;
+    font-size: 2.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* --- Stats and Question Counter --- */
-.header-stats {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1.1em;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px dashed #ffc0cb; 
-}
-
-/* --- Problem Display --- */
-.problem-area {
-    border: 2px solid #ffc0cb; 
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    background-color: #fff0f5; 
-}
-
-.word-problem-display {
-    font-size: 1.3em;
-    font-weight: bold;
-    color: #8b0000; /* Dark Red */
-    margin: 15px 0;
-    line-height: 1.5;
-}
-
-/* --- Multiple Choice Options --- */
-.options-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+.subtitle {
+    color: #0288d1;
+    font-size: 1.3rem;
     margin-bottom: 25px;
 }
 
-.option-button {
-    padding: 15px;
-    font-size: 1.4em;
-    border: 2px solid #ff69b4; 
-    border-radius: 10px;
-    cursor: pointer;
-    background-color: #fff0f5; 
-    transition: background-color 0.2s, transform 0.1s;
-    line-height: 1.2;
+/* Learning Objective Section */
+.objective {
+    background-color: #e3f2fd;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    color: #0277bd;
+    text-align: left;
 }
 
-.option-button:hover {
-    background-color: #ffc0cb; 
-    transform: scale(1.02);
+.objective h2 {
+    color: #01579b;
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 1.4rem;
+}
+
+/* Game Rules Section */
+.rules {
+    background-color: #e3f2fd;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    color: #0277bd;
+    text-align: left;
+}
+
+.rules h2 {
+    color: #01579b;
+    margin-bottom: 12px;
+    text-align: center;
+    font-size: 1.4rem;
+}
+
+.rules ol {
+    padding-left: 20px;
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.rules li {
+    margin: 8px 0;
+}
+
+.btn {
+    background: #2196f3;
+    color: white;
+    border: none;
+    padding: 14px 35px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 20px;
+    box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    background: #1976d2;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(33, 150, 243, 0.5);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Quiz Screen Styles */
+.header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+}
+
+.score {
+    background: #bbdefb;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    color: #0d47a1;
+}
+
+.problem-container {
+    margin: 30px 0;
+}
+
+#problem-text {
+    font-size: 1.6rem;
+    margin-bottom: 35px;
+    color: #01579b;
+    line-height: 1.5;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.option-btn {
+    padding: 16px;
+    font-size: 1.2rem;
+    border: 2px solid #90caf9;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: bold;
+    color: #0288d1;
+}
+
+.option-btn:hover {
+    background: #e3f2fd;
+    transform: translateY(-2px);
+    border-color: #2196f3;
+}
+
+.option-btn:active {
+    transform: translateY(0);
+}
+
+.option-btn.selected {
+    border-color: #2196f3;
+    background: #e3f2fd;
+    box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+}
+
+/* Game Over Screen */
+.result {
+    margin: 30px 0;
+    font-size: 1.4rem;
+    color: #01579b;
+}
+
+.result p {
+    margin-bottom: 20px;
 }
 
 .feedback {
-    min-height: 25px;
+    padding: 15px;
+    border-radius: 12px;
     margin-top: 15px;
     font-weight: bold;
+    font-size: 1.2rem;
 }
 
-.correct {
-    color: #3cb371; 
+.feedback.excellent { 
+    background-color: #e8f5e9; 
+    color: #2e7d32; 
 }
 
-.incorrect {
-    color: #dc143c; 
+.feedback.good { 
+    background-color: #fff9c4; 
+    color: #f57f17; 
 }
 
-/* --- Fraction Formatting (for answers) --- */
-.fraction-line {
-    border-bottom: 3px solid #333;
-    display: inline-block;
-    padding: 0 5px;
-    margin: 0 5px;
-    vertical-align: middle;
-}
-.whole-number {
-    font-size: 0.8em;
-    vertical-align: middle;
+.feedback.practice { 
+    background-color: #ffebee; 
+    color: #c62828; 
 }
 
-/* --- Start and Next Button Styles --- */
-#start-button, #next-button {
-    padding: 15px 30px;
-    font-size: 1.2em;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    background-color: #ff69b4; /* Hot Pink */
-    color: white;
-    font-weight: bold;
-    margin-top: 20px;
-    box-shadow: 0 4px #c70d74;
-    transition: background-color 0.2s;
-}
-
-#start-button:active, #next-button:active {
-    box-shadow: none;
-    transform: translateY(4px);
-}
-
-/* --- Results Screen Styles --- */
-.results-screen {
-    display: none; 
-    padding: 20px;
-    border: 3px solid #ff1493; 
-    border-radius: 15px;
-    background-color: #fff0f5; 
-}
-
-.results-screen h2 {
-    color: #ff1493;
-    font-size: 2em;
-}
-
-.score-final {
-    font-size: 3em;
-    font-weight: bold;
-    color: #3cb371; 
-    margin: 10px 0 20px;
+@media (max-width: 600px) {
+    .screen {
+        padding: 30px 20px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .objective, .rules {
+        padding: 15px;
+    }
+    
+    .rules ol {
+        padding-left: 15px;
+    }
+    
+    #problem-text {
+        font-size: 1.4rem;
+    }
+    
+    .option-btn {
+        padding: 14px;
+        font-size: 1.1rem;
+    }
 }
